@@ -7,25 +7,32 @@ pipeline {
     }
 
     environment {
-        IMAGE = 'tasnimetrabelsi/trabelsitasnim-5ds8-gestionprojets'
+        BACKEND_IMAGE  = 'tasnimetrabelsi/trabelsitasnim-5ds8-gestionprojets'
+        FRONTEND_IMAGE = 'tasnimetrabelsi/trabelsitasnim-5ds8-gestionprojets-frontend'
     }
 
     stages {
         stage('Maven Clean & Compile') {
             steps {
-                sh 'mvn clean compile'
+                dir('backend') {
+                    sh 'mvn clean compile'
+                }
             }
         }
 
         stage('Maven Package') {
             steps {
-                sh 'mvn package -DskipTests'
+                dir('backend') {
+                    sh 'mvn package -DskipTests'
+                }
             }
         }
 
-        stage('Docker Build') {
+        stage('Docker Build (backend + frontend)') {
             steps {
-                sh "docker build -t ${IMAGE}:${BUILD_NUMBER} -t ${IMAGE}:latest ."
+                sh 'docker compose build'
+                sh "docker tag ${BACKEND_IMAGE}:latest ${BACKEND_IMAGE}:${BUILD_NUMBER}"
+                sh "docker tag ${FRONTEND_IMAGE}:latest ${FRONTEND_IMAGE}:${BUILD_NUMBER}"
             }
         }
 
@@ -35,8 +42,10 @@ pipeline {
                                                   usernameVariable: 'DOCKER_USER',
                                                   passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                    sh "docker push ${IMAGE}:${BUILD_NUMBER}"
-                    sh "docker push ${IMAGE}:latest"
+                    sh "docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}"
+                    sh "docker push ${BACKEND_IMAGE}:latest"
+                    sh "docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}"
+                    sh "docker push ${FRONTEND_IMAGE}:latest"
                 }
             }
         }

@@ -16,7 +16,7 @@ services:
       retries: 10
 
   backend:
-    build: .
+    build: ./backend
     image: tasnimetrabelsi/trabelsitasnim-5ds8-gestionprojets:latest
     container_name: backend
     depends_on:
@@ -32,6 +32,17 @@ services:
     networks:
       - devops-net
     restart: on-failure
+
+  frontend:
+    build: ./frontend
+    image: tasnimetrabelsi/trabelsitasnim-5ds8-gestionprojets-frontend:latest
+    container_name: frontend
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+    networks:
+      - devops-net
 
 volumes:
   mysql_data:
