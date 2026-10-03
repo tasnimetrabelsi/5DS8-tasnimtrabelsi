@@ -5,6 +5,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: test_db
+    # Exposé pour le stage "Tests" de Jenkins (application.properties pointe sur localhost:3306)
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
